@@ -1,0 +1,12 @@
+oauth:
+  consumer_key:        "replace"
+  consumer_secret:     "this"
+  access_token:        "666-withyourown"
+  access_token_secret: "keys"
+
+texts:
+  - "Microsoft"
+  - /le[vw]a/   # Regular expression
+
+add_to_list: true
+list_name: "unfollowed-by-bot"
