@@ -27,6 +27,7 @@
 require "yaml"
 require "twitter"
 require "ostruct"
+require "pp"
 
 CONFIG = YAML.load_file File.expand_path('.', "config.yml")
 
@@ -75,7 +76,7 @@ end
 
 ##
 # unfollows an user and adds it to the twitter list of unfollowed users if
-# +CONFIG["list_name"]+ is set
+# +CONFIG["list_name"]+ is set.
 # @param user [Integer, String] the user id or screen name to unfollow
 def unfollow user
   puts "unfollowing #{user}"
@@ -100,21 +101,61 @@ loop do
             texts.each do |text|
               if text.class == Regexp
                 if text.match object.text.downcase
-                  unfollow object.user.id
+                  unfollow object.user.id unless CONFIG["whitelist"].include? object.user.id
                 end
               elsif text.class == String
                 if object.text.downcase.include? text.downcase
-                  unfollow object.user.id
+                  unfollow object.user.id unless CONFIG["whitelist"].include? object.user.id
                 end
               end
             end
+          end
+        else  # probably a command!
+          if /^ubot:(\S+)\s?(.*)?/ =~ object.text.downcase
+            case $1
+            when "whitelist-add", "add-whitelist", "wa", "aw", "awl", "wla"
+              if $2 # needs arguments
+                begin
+                  # lookup the user's ID
+                  user = $client.user $2.strip, skip_status: true
+                  puts "adding #{user.id} (#{user.screen_name}) to the whitelist"
+                  CONFIG["whitelist"] << user.id
+                rescue Exception => e
+                  puts "#{e.message}, aka user #{$2} does not exist"
+                end
+              end
+            when "whitelist-del", "del-whitelist", "wd", "dw", "dwl", "wld"
+              if $2 # needs arguments
+                begin
+                  # lookup the user's ID
+                  user = $client.user $2.strip, skip_status: true
+                  puts "removing #{user.id} (#{user.screen_name}) from the whitelist"
+                  CONFIG["whitelist"].delete user.id
+                rescue Exception => e
+                  puts "#{e.message}, aka user #{$2} does not exist"
+                end
+              end
+            when "debug", "dbg"
+              print "$client => "
+              pp $client
+              print "CONFIG => "
+              pp CONFIG
+              print "texts => "
+              pp texts
+            end
+            # delete the tweet afterwards
+            $client.destroy_status object.id
           end
         end
       end
     end
   rescue Exception => e
     if e.class == Interrupt
-      puts "\rexiting..."
+      print "\rsaving config..."
+      File.open File.expand_path('.', "config.yml"), "w" do |f|
+        f.write(CONFIG.to_yaml)
+      end
+      puts " done"
       exit 0
     end
     puts "lost userstream connection: #{e.message}"

@@ -1,3 +1,4 @@
+---
 oauth:
   consumer_key:        "replace"
   consumer_secret:     "this"
@@ -10,3 +11,6 @@ texts:
 
 add_to_list: true
 list_name: "unfollowed-by-bot"
+
+whitelist:      # array containing the whitelisted users' IDs
+  - 491699007
