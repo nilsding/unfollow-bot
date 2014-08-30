@@ -88,6 +88,16 @@ def unfollow user
   end
 end
 
+##
+# saves the configuration
+def save_config
+  print "\rsaving config..."
+  File.open File.expand_path('.', "config.yml"), "w" do |f|
+    f.write(CONFIG.to_yaml)
+  end
+  puts " done"
+end
+
 # userstream thing
 loop do
   begin
@@ -135,6 +145,8 @@ loop do
                   puts "#{e.message}, aka user #{$2} does not exist"
                 end
               end
+            when "save-config", "save", "s"
+              save_config
             when "debug", "dbg"
               print "$client => "
               pp $client
@@ -151,11 +163,7 @@ loop do
     end
   rescue Exception => e
     if e.class == Interrupt
-      print "\rsaving config..."
-      File.open File.expand_path('.', "config.yml"), "w" do |f|
-        f.write(CONFIG.to_yaml)
-      end
-      puts " done"
+      save_config
       exit 0
     end
     puts "lost userstream connection: #{e.message}"
