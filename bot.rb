@@ -96,7 +96,7 @@ loop do
       when Twitter::Tweet
         unless current_user.id == object.user.id    # can't unfollow ourselves
           unless object.text[0..3].include? "RT @"  # ignore retweets
-            puts object.text
+#             puts object.text
             texts.each do |text|
               if text.class == Regexp
                 if text.match object.text.downcase
