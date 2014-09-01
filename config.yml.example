@@ -7,7 +7,7 @@ oauth:
 
 texts:
   - "Microsoft"
-  - /le[vw]a/   # Regular expression
+  - /\sle[vw]a\s/   # Regular expression
 
 add_to_list: true
 list_name: "unfollowed-by-bot"
